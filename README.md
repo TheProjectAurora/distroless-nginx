@@ -22,9 +22,12 @@ I'm the evil person and I'm not going to distribute the pre-build
 container images. The reason is simple: It's bad practice to use 
 non-library images which you don't build yourself. 
 
+The containers needs [BuildKit](https://docs.docker.com/build/buildkit/#getting-started)
+to get built.
+
 So building:
-* Debug: `docker build -t myNginxBuildDebug -f Dockerfile.debug .`
-* Non-debug: `docker build -t myNginxBuildDebug .`
+* Debug: `DOCKER_BUILDKIT=1 docker build -t myNginxBuildDebug -f Dockerfile.debug .`
+* Non-debug: `DOCKER_BUILDKIT=1 docker build -t myNginxBuildDebug .`
 
 ## Running
 
@@ -43,10 +46,3 @@ I might change that later. At the container world (and docker) you can
 easily redirect the local port to the non-protected port inside the 
 container.
 
-## To be done
-
-* Fix the logging - it's going to the file at the moment. The challenge
-at the STDOUT logging is that I don't have `ln` inside the distroless
-container. It's needed to log to STDOUT. If you want to fix that quickly
-change the logging from `nginx.conf` and `default.conf` to log error and
-access logs to standard output.
