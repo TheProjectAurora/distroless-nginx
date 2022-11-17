@@ -20,8 +20,9 @@ RUN apt update && apt -y install wget gnupg binutils && \
         /packages/usr/share/pixmaps \
         /packages/usr/bin \
         /packages/usr/bin/dpkg* \
-        /packages/usr/bin/nginx-debug
-FROM gcr.io/distroless/static-debian11:latest
+        /packages/usr/bin/nginx-debug && \
+        mkdir -p /packages/var/run
+FROM scratch
 COPY --from=builder /packages /
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
