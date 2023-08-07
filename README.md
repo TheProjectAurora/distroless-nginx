@@ -14,7 +14,7 @@ shell.
 ## Production
 
 The production version of the distroless do not have any debugging
-tools. 
+tools, container is created to be rootless and nginx default port configuration is updated to port 8000 (security reasons we should not use port lower than 1024).
 
 ## Building
 
@@ -34,6 +34,10 @@ So building:
 This is executed with the command:
 
 `docker run -d --rm -p 80:80 myNginxBuild`
+
+## Nginx configs
+
+Folder nginx_configs contains nginx configuration files which are copied into correct locations to filesystem to be found for nginx when start up.
 
 ## Security stuff
 

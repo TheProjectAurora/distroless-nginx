@@ -1,5 +1,18 @@
 # syntax=docker/dockerfile:1
 FROM debian:11 as builder
+
+ENV USER=nonroot
+ENV UID=10001 
+
+RUN adduser \    
+    --disabled-password \    
+    --gecos "" \    
+    --home "/nonexistent" \    
+    --shell "/sbin/nologin" \    
+    --no-create-home \    
+    --uid "${UID}" \    
+    "${USER}"
+
 RUN apt update && apt -y install wget gnupg binutils && \
     wget "https://nginx.org/keys/nginx_signing.key" && \
     apt-key add nginx_signing.key && \
@@ -22,12 +35,27 @@ RUN apt update && apt -y install wget gnupg binutils && \
         /packages/usr/bin/dpkg* \
         /packages/usr/bin/nginx-debug && \
         mkdir -p /packages/var/run
+
+RUN chown -R nonroot:nonroot /var/cache /var/run
+
+RUN touch /var/run/nginx.pid && \
+    chown -R nonroot:nonroot /var/run/nginx.pid
+
 FROM scratch
 COPY --from=builder /packages /
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
-RUN --mount=type=bind,from=builder,target=/mount ["/mount/bin/ln", "-sf", "/dev/stdout", "/var/log/nginx/access.log" ]
-RUN --mount=type=bind,from=builder,target=/mount ["/mount/bin/ln", "-sf", "/dev/stderr", "/var/log/nginx/error.log" ]
-EXPOSE 80
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
+COPY --from=builder /var/cache /var/cache
+COPY --from=builder /var/run /var/run
 
+COPY nginx_configs/nginx.conf /etc/nginx/nginx.conf
+COPY nginx_configs/default.conf /etc/nginx/conf.d/default.conf
+
+RUN --mount=type=bind,from=builder,target=/mount ["/mount/bin/ln", "-sf", "/dev/stdout", "/var/log/nginx/access.log"]
+RUN --mount=type=bind,from=builder,target=/mount ["/mount/bin/ln", "-sf", "/dev/stderr", "/var/log/nginx/error.log"]
+
+EXPOSE 8000
+
+USER nonroot
+
+CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
