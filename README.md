@@ -50,3 +50,9 @@ I might change that later. At the container world (and docker) you can
 easily redirect the local port to the non-protected port inside the 
 container.
 
+## GitHub actions
+
+This repository contains simple pipeline to build up distroless-nginx container image, scan image for vulnerabilities using Trivy and push image to NorthCode ECR.
+
+Pipeline uses Github environment specific secrets which are used only protected branches to prevent exposing AWS account ID's and roles used for deployments to outsiders. 
+
